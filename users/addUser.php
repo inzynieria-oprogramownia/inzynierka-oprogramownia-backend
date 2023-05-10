@@ -1,22 +1,25 @@
 <?php
-    session_start();
-    
-    error_reporting(E_ALL);
-    ini_set('display_errors',1);
+    error_reporting(0);
     header("Access-Control-Allow-Origin: *");
     header("Content-Type: application/json");
-    header("Access-Control-Allow-Method: GET");
+    header("Access-Control-Allow-Method: POST");
     header("Access-Control-Allow-Headers: *");
 
     include('functions.php');
 
-    $method = $_SERVER['REQUEST_METHOD'];
+    $method = $_SERVER["REQUEST_METHOD"];
 
     
 
-    if ($method == "GET"){
-        $getAllUsers = getAllUsers();
-        echo $getAllUsers;
+    if ($method == 'POST'){
+        $inputData = json_decode(file_get_contents("php://input"), true);
+        
+        if (empty($inputData)){
+            $addUser = addUserFunc($_POST);
+        } else {
+            $addUser = addUserFunc($inputData);
+        }
+        echo $addUser;
 
     } else {
         $data = [
