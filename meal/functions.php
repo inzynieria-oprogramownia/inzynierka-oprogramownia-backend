@@ -78,5 +78,92 @@ function addMealFunc($addMeal){
 
 }
 
+function getMealFunc($mealID){
+
+    global $conn;
+
+    if ($mealID['id'] == null){
+
+        return error422('Enter meal ID');
+
+    } 
+
+    $ID = mysqli_real_escape_string($conn, $mealID['id']);
+
+    $query = "SELECT * FROM react_php_recipe WHERE id='$ID' LIMIT 1";
+    $result = mysqli_query($conn,$query);
+
+    if ($result){
+        
+        if (mysqli_num_rows($result) == 1) {
+            $res = mysqli_fetch_assoc($result);
+
+            $data = [
+                'status' => 200,
+                'messeage' => 'Meal Found',
+                'data' => $res
+            ];
+            header("HTTP/1.0 200 Success");
+            return json_encode($data);
+
+        } else {
+            $data = [
+                'status' => 404,
+                'messeage' => 'No User Found',
+            ];
+            header("HTTP/1.0 500 Not Found");
+            return json_encode($data);
+        }
+
+    } else {
+        $data = [
+            'status' => 500,
+            'messeage' => $method. 'Internal Server Error',
+        ];
+        header("HTTP/1.0 500 Internal Server Error");
+        return json_encode($data);
+    }
+
+}
+
+
+function getAllMealsFunc(){
+    global $conn;
+
+    $query = "SELECT * FROM react_php_recipe";
+    $result = mysqli_query($conn, $query);
+
+    if ($result){
+        if (mysqli_num_rows($result) > 0){
+
+            $res = mysqli_fetch_all($result,MYSQLI_ASSOC);
+
+            $data = [
+                'status' => 200,
+                'message' => 'Meal List Fetched Successfully',
+                'data' => $res
+            ];
+            header("HTTP/1.0 200 Meal List Fetched Successfully");
+            return json_encode($data);
+
+        } else {
+            $data = [
+                'status' => 404,
+                'messeage' => $method. 'No Meal Found',
+            ];
+            header("HTTP/1.0 404 No Meal Found");
+            return json_encode($data);
+        }
+
+
+    } else {
+        $data = [
+            'status' => 500,
+            'messeage' => $method. 'Internal Server Error',
+        ];
+        header("HTTP/1.0 500 Internal Server Error");
+        return json_encode($data);
+    }
+}
 
 ?>
