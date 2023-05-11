@@ -150,4 +150,60 @@ function getUserFunc($userID){
 
 }
 
+
+function loginUserFunc($loginUser){
+
+    global $conn;
+
+    if ($loginUser['login'] == null){
+
+        return error422('Enter your login');
+
+    } elseif ($loginUser['password'] == null){
+
+        return error422('Enter your password');
+
+    }
+
+    $login = mysqli_real_escape_string($conn, $loginUser['login']);
+    $password = mysqli_real_escape_string($conn, $loginUser['password']);
+
+
+    $query = "SELECT id FROM react_php_users WHERE login='$login' AND password='$password' LIMIT 1";
+    $result = mysqli_query($conn, $query);
+
+    if ($result){
+        
+        if (mysqli_num_rows($result)==1){
+
+            $res = mysqli_fetch_assoc($result);
+            $data = [
+                'status' => 200,
+                'messeage' => 'Ok',
+                'data' => $res
+            ];
+            header("HTTP/1.0 500 Not Found");
+            return json_encode($data);
+
+        } else {
+            $data = [
+                'status' => 404,
+                'messeage' => 'No User Found',
+            ];
+            header("HTTP/1.0 500 Not Found");
+            return json_encode($data);
+        }
+
+    } else {
+        $data = [
+            'status' => 500,
+            'messeage' => 'Internal Server Error',
+        ];
+        header("HTTP/1.0 500 Not Found");
+        return json_encode($data);
+    }
+
+}
+
+
 ?>
