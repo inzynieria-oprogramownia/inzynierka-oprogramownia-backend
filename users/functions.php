@@ -95,4 +95,53 @@ function addUserFunc($addUser){
 
 }
 
+
+function getUserFunc($userID){
+
+    global $conn;
+
+    if ($userID['id'] == null){
+
+        return error422('Enter your user ID');
+
+    } 
+
+    $ID = mysqli_real_escape_string($conn, $userID['id']);
+
+    $query = "SELECT * FROM react_php_users WHERE id='$ID' LIMIT 1";
+    $result = mysqli_query($conn,$query);
+
+    if ($result){
+        
+        if (mysqli_num_rows($result) == 1) {
+            $res = mysqli_fetch_assoc($result);
+
+            $data = [
+                'status' => 200,
+                'messeage' => 'User Found',
+                'data' => $res
+            ];
+            header("HTTP/1.0 200 Success");
+            return json_encode($data);
+
+        } else {
+            $data = [
+                'status' => 404,
+                'messeage' => 'No User Found',
+            ];
+            header("HTTP/1.0 500 Not Found");
+            return json_encode($data);
+        }
+
+    } else {
+        $data = [
+            'status' => 500,
+            'messeage' => $method. 'Internal Server Error',
+        ];
+        header("HTTP/1.0 500 Internal Server Error");
+        return json_encode($data);
+    }
+
+}
+
 ?>
