@@ -108,7 +108,13 @@ function getUserFunc($userID){
 
     $ID = mysqli_real_escape_string($conn, $userID['id']);
 
-    $query = "SELECT * FROM react_php_users WHERE id='$ID' LIMIT 1";
+    $query = "SELECT u.id, u.login, u.email, u.password, GROUP_CONCAT(DISTINCT r.id SEPARATOR ', ') AS liked_meals, GROUP_CONCAT(DISTINCT rec.id SEPARATOR ', ') AS created_meals
+    FROM react_php_users AS u
+    JOIN react_php_liked_recipe AS lr ON u.id = lr.userID
+    JOIN react_php_recipe AS r ON lr.mealID = r.id
+    JOIN react_php_recipe AS rec ON rec.userID = u.id
+    GROUP BY u.login;";
+
     $result = mysqli_query($conn,$query);
 
     if ($result){
