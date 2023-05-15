@@ -16,6 +16,7 @@ function addCommentFunc($addComment){
     global $conn;
 
     $userid = mysqli_real_escape_string($conn, $addComment['userid']);
+    $postid = mysqli_real_escape_string($conn, $addComment['postid']);
     $date = date('Y.m.d h:i:sa');
     $comment = mysqli_real_escape_string($conn, $addComment['comment']);
 
@@ -29,7 +30,7 @@ function addCommentFunc($addComment){
         return error422('Enter comment');
 
     } else {
-        $query = "INSERT INTO react_php_comments (userid, comment, date) VALUES ('$userid', '$comment', '$date')";
+        $query = "INSERT INTO react_php_comments (userid, postid, comment, date) VALUES ('$userid', '$postid', '$comment', '$date')";
         $result = mysqli_query($conn, $query);
 
         if ($result){
