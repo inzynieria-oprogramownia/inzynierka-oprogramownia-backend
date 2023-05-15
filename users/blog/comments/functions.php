@@ -25,6 +25,10 @@ function addCommentFunc($addComment){
 
         return error422('Enter user ID');
 
+    } elseif (empty(trim($postid))) {
+
+        return error422('Enter post ID');
+
     } elseif (empty(trim($comment))) {
 
         return error422('Enter comment');
