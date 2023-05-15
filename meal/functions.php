@@ -63,7 +63,29 @@ function addMealFunc($addMeal){
         $result = mysqli_query($conn, $query);
 
         if ($result){
-            
+            $mealId = mysqli_insert_id($conn);
+
+
+            if (isset($addMeal['ingredient']) && is_array($addMeal['ingredient'])) {
+                $ingredients = $addMeal['ingredient'];
+
+                foreach ($ingredients as $ingredient) {
+                    $ingredientName = mysqli_real_escape_string($conn, $ingredient['name']);
+                    $ingredientWeight = mysqli_real_escape_string($conn, $ingredient['weight']);
+                    $ingredientQuery = "INSERT INTO react_php_ingredient (mealid, name, weight) VALUES ('$mealId', '$ingredientName', '$ingredientWeight')";
+                    $ingredientResult = mysqli_query($conn, $ingredientQuery);
+
+                    if(!$ingredientResult) {
+                        $data = [
+                            'status' => 500,
+                            'message' => 'Internal Server Error',
+                        ];
+                        header("HTTP/1.0 500 Internal Server Error");
+                        return json_encode($data);
+                    }
+                }
+            }
+
             $data = [
                 'status' => 201,
                 'message' => 'Meal Added Successfully',
@@ -95,26 +117,55 @@ function getMealFunc($mealID){
 
     $ID = mysqli_real_escape_string($conn, $mealID['id']);
 
-    $query = "SELECT backgroundImage, title, date, description, time, people, kcal, mealoption FROM react_php_recipe WHERE id='$ID' LIMIT 1";
+    $query = "SELECT r.backgroundImage, r.title, r.date, r.description, r.time, r.people, r.kcal, r.mealoption, ing.name AS ingredient_name, ing.weight AS ingredient_weight
+          FROM react_php_recipe AS r
+          JOIN react_php_ingredient AS ing ON r.id = ing.mealid
+          WHERE r.id = '$ID'";
+
     $result = mysqli_query($conn,$query);
 
     if ($result){
         
-        if (mysqli_num_rows($result) == 1) {
-            $res = mysqli_fetch_assoc($result);
+        if (mysqli_num_rows($result) > 0) {
 
             $data = [
                 'status' => 200,
                 'messeage' => 'Meal Found',
-                'data' => $res
+                'data' => [
+                    'ingredients' => [],
+                ]
             ];
+
+            while ($row = mysqli_fetch_object($result)) {
+                if (!isset($data['data']['title'])) {
+                    $data['data']['title'] = $row->title;
+                    $data['data']['backgroundImage'] = $row->backgroundImage;
+                    $data['data']['date'] = $row->date;
+                    $data['data']['description'] = $row->description;
+                    $data['data']['time'] = $row->time;
+                    $data['data']['people'] = $row->people;
+                    $data['data']['kcal'] = $row->kcal;
+                    $data['data']['mealoption'] = $row->mealoption;
+                }
+            
+                $ingredient = new stdClass();
+                $ingredient->name = $row->ingredient_name;
+                $ingredient->weight = $row->ingredient_weight;
+                if (!in_array($ingredient, $data['data']['ingredients'])) {
+                    $data['data']['ingredients'][] = $ingredient;
+                }
+            }
+
+
+
+
             header("HTTP/1.0 200 Success");
             return json_encode($data);
 
         } else {
             $data = [
                 'status' => 404,
-                'messeage' => 'No User Found',
+                'messeage' => 'No Meal Found',
             ];
             header("HTTP/1.0 500 Not Found");
             return json_encode($data);
