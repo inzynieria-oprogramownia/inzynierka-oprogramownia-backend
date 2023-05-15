@@ -17,6 +17,7 @@ function addMealFunc($addMeal){
     global $conn;
 
     $backgroundImage = mysqli_real_escape_string($conn, $addMeal['backgroundImage']);
+    $userID = mysqli_real_escape_string($conn, $addMeal['userID']);
     $title = mysqli_real_escape_string($conn, $addMeal['title']);
     $date = date('Y.m.d');
     $description = mysqli_real_escape_string($conn, $addMeal['description']);
@@ -28,6 +29,10 @@ function addMealFunc($addMeal){
     if (empty(trim($backgroundImage))) {
 
         return error422('Enter meal backgroundImage');
+
+    } elseif (empty(trim($userID))) {
+
+        return error422('Enter userID');
 
     } elseif (empty(trim($title))) {
 
@@ -54,7 +59,7 @@ function addMealFunc($addMeal){
         return error422('Enter meal type');
 
     } else {
-        $query = "INSERT INTO react_php_recipe (backgroundImage, title, date, description, time, people, kcal, mealoption) VALUES ('$backgroundImage', '$title', '$date', '$description', '$time', '$people', '$kcal', '$mealoption')";
+        $query = "INSERT INTO react_php_recipe (userID, backgroundImage, title, date, description, time, people, kcal, mealoption) VALUES ('$userID', '$backgroundImage' , '$title', '$date', '$description', '$time', '$people', '$kcal', '$mealoption')";
         $result = mysqli_query($conn, $query);
 
         if ($result){
@@ -63,7 +68,7 @@ function addMealFunc($addMeal){
                 'status' => 201,
                 'message' => 'Meal Added Successfully',
             ];
-            header("HTTP/1.0 201 Created");
+            header("HTTP/1.0 201 Created"); 
             return json_encode($data);
 
         } else {
@@ -90,7 +95,7 @@ function getMealFunc($mealID){
 
     $ID = mysqli_real_escape_string($conn, $mealID['id']);
 
-    $query = "SELECT * FROM react_php_recipe WHERE id='$ID' LIMIT 1";
+    $query = "SELECT backgroundImage, title, date, description, time, people, kcal, mealoption FROM react_php_recipe WHERE id='$ID' LIMIT 1";
     $result = mysqli_query($conn,$query);
 
     if ($result){
@@ -130,7 +135,7 @@ function getMealFunc($mealID){
 function getAllMealsFunc(){
     global $conn;
 
-    $query = "SELECT * FROM react_php_recipe";
+    $query = "SELECT backgroundImage, title, date, description, time, people, kcal, mealoption FROM react_php_recipe";
     $result = mysqli_query($conn, $query);
 
     if ($result){

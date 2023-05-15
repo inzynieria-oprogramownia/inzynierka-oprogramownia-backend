@@ -113,6 +113,7 @@ function getUserFunc($userID){
     JOIN react_php_liked_recipe AS lr ON u.id = lr.userID
     JOIN react_php_recipe AS r ON lr.mealID = r.id
     JOIN react_php_recipe AS rec ON rec.userID = u.id
+    WHERE u.id='$ID'
     GROUP BY u.login;";
 
     $result = mysqli_query($conn,$query);
