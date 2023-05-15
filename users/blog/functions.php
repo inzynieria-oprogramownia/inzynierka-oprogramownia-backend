@@ -17,7 +17,7 @@ function addPostFunc($addPost){
 
     $title = mysqli_real_escape_string($conn, $addPost['title']);
     $image = mysqli_real_escape_string($conn, $addPost['image']);
-    $date = date('Y-m-d');
+    $date = date('Y.m.d');
 
     if (empty(trim($title))){
 
