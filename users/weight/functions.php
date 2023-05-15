@@ -54,7 +54,7 @@ function getWieghtFunc($userID){
     } else {
         $data = [
             'status' => 500,
-            'messeage' => $method. 'Internal Server Error',
+            'messeage' => 'Internal Server Error',
         ];
         header("HTTP/1.0 500 Internal Server Error");
         return json_encode($data);
@@ -95,7 +95,7 @@ function addWeightFunc($addWeight){
         } else {
             $data = [
                 'status' => 500,
-                'messeage' => $method. 'Internal Server Error',
+                'messeage' => 'Internal Server Error',
             ];
             header("HTTP/1.0 500 Internal Server Error");
             return json_encode($data);

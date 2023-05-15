@@ -44,7 +44,7 @@ function addCommentFunc($addComment){
         } else {
             $data = [
                 'status' => 500,
-                'messeage' => $method. 'Internal Server Error',
+                'messeage' => 'Internal Server Error',
             ];
             header("HTTP/1.0 500 Internal Server Error");
             return json_encode($data);
@@ -94,7 +94,7 @@ function getCommentFunc($getComment){
     } else {
         $data = [
             'status' => 500,
-            'messeage' => $method. 'Internal Server Error',
+            'messeage' => 'Internal Server Error',
         ];
         header("HTTP/1.0 500 Internal Server Error");
         return json_encode($data);
@@ -125,7 +125,7 @@ function getAllCommentsFunc(){
         } else {
             $data = [
                 'status' => 404,
-                'messeage' => $method. 'No Meal Found',
+                'messeage' => 'No Meal Found',
             ];
             header("HTTP/1.0 404 No Meal Found");
             return json_encode($data);
@@ -135,7 +135,7 @@ function getAllCommentsFunc(){
     } else {
         $data = [
             'status' => 500,
-            'messeage' => $method. 'Internal Server Error',
+            'messeage' => 'Internal Server Error',
         ];
         header("HTTP/1.0 500 Internal Server Error");
         return json_encode($data);
