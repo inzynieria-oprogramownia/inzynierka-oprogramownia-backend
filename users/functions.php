@@ -24,7 +24,7 @@ function getAllUsers(){
         } else {
             $data = [
                 'status' => 404,
-                'messeage' => $method. 'No Customer Fount',
+                'messeage' => 'No Customer Fount',
             ];
             header("HTTP/1.0 404 No Customer Fount");
             return json_encode($data);
@@ -34,7 +34,7 @@ function getAllUsers(){
     } else {
         $data = [
             'status' => 500,
-            'messeage' => $method. 'Internal Server Error',
+            'messeage' => 'Internal Server Error',
         ];
         header("HTTP/1.0 500 Internal Server Error");
         return json_encode($data);
@@ -86,7 +86,7 @@ function addUserFunc($addUser){
         } else {
             $data = [
                 'status' => 500,
-                'messeage' => $method. 'Internal Server Error',
+                'messeage' => 'Internal Server Error',
             ];
             header("HTTP/1.0 500 Internal Server Error");
             return json_encode($data);
@@ -142,7 +142,7 @@ function getUserFunc($userID){
     } else {
         $data = [
             'status' => 500,
-            'messeage' => $method. 'Internal Server Error',
+            'messeage' => 'Internal Server Error',
         ];
         header("HTTP/1.0 500 Internal Server Error");
         return json_encode($data);
