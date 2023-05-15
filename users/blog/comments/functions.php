@@ -1,6 +1,6 @@
 <?PHP
 
-require '..\..\DBconnect.php';
+require '..\..\..\DBconnect.php';
 
 function error422($mess){
     $data = [
