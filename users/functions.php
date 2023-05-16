@@ -108,26 +108,51 @@ function getUserFunc($userID){
 
     $ID = mysqli_real_escape_string($conn, $userID['id']);
 
-    $query = "SELECT u.id, u.login, u.email, u.password, GROUP_CONCAT(DISTINCT r.id SEPARATOR ', ') AS liked_meals, GROUP_CONCAT(DISTINCT rec.id SEPARATOR ', ') AS created_meals
+    $query = "SELECT u.*, lr.mealID AS liked_meal_id, rec.id AS created_meal_id
     FROM react_php_users AS u
-    JOIN react_php_liked_recipe AS lr ON u.id = lr.userID
-    JOIN react_php_recipe AS r ON lr.mealID = r.id
-    JOIN react_php_recipe AS rec ON rec.userID = u.id
+    LEFT JOIN react_php_liked_recipe AS lr ON u.id = lr.userID
+    LEFT JOIN react_php_recipe AS r ON lr.mealID = r.id
+    LEFT JOIN react_php_recipe AS rec ON u.id = rec.userID
     WHERE u.id='$ID'
-    GROUP BY u.login;";
+    GROUP BY u.id, lr.mealID, rec.id;";
 
     $result = mysqli_query($conn,$query);
 
     if ($result){
         
-        if (mysqli_num_rows($result) == 1) {
-            $res = mysqli_fetch_assoc($result);
+        if (mysqli_num_rows($result) > 0) {
 
             $data = [
                 'status' => 200,
                 'messeage' => 'User Found',
-                'data' => $res
+                'data' => [
+                    'liked_meals' => [],
+                    'created_meals' => [],
+                ],
             ];
+
+            while ($row = mysqli_fetch_object($result)) {
+                if (!isset($data['data']['id'])) {
+                    $data['data']['id'] = $row->id;
+                    $data['data']['login'] = $row->login;
+                    $data['data']['email'] = $row->email;
+                    $data['data']['password'] = $row->password;
+                }
+            
+                $liked_meal = new stdClass();
+                $liked_meal->id = $row->liked_meal_id;
+                if (!in_array($liked_meal, $data['data']['liked_meals'])) {
+                    $data['data']['liked_meals'][] = $liked_meal;
+                }
+
+                $created_meal = new stdClass();
+                $created_meal->id = $row->created_meal_id;
+                if (!in_array($created_meal, $data['data']['created_meals'])) {
+                    $data['data']['created_meals'][] = $created_meal;
+                }
+        
+            }
+
             header("HTTP/1.0 200 Success");
             return json_encode($data);
 
