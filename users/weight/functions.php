@@ -19,7 +19,7 @@ function getWieghtFunc($userID){
 
     if ($userID['id'] == null){
 
-        return error422('Enter user ID');
+        return error422('Enter ID');
 
     } 
 

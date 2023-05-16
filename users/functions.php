@@ -108,13 +108,14 @@ function getUserFunc($userID){
 
     $ID = mysqli_real_escape_string($conn, $userID['id']);
 
-    $query = "SELECT u.*, lr.mealID AS liked_meal_id, rec.id AS created_meal_id
+    $query = "SELECT u.*, lr.mealID AS liked_meal_id, rec.id AS created_meal_id, w.weight AS user_weight, w.date AS user_weight_date
     FROM react_php_users AS u
     LEFT JOIN react_php_liked_recipe AS lr ON u.id = lr.userID
     LEFT JOIN react_php_recipe AS r ON lr.mealID = r.id
     LEFT JOIN react_php_recipe AS rec ON u.id = rec.userID
+    LEFT JOIN react_php_user_weight AS w ON w.userid = u.id
     WHERE u.id='$ID'
-    GROUP BY u.id, lr.mealID, rec.id;";
+    GROUP BY u.id, lr.mealID, rec.id, w.weight, w.date;";
 
     $result = mysqli_query($conn,$query);
 
@@ -128,6 +129,7 @@ function getUserFunc($userID){
                 'data' => [
                     'liked_meals' => [],
                     'created_meals' => [],
+                    'user_weights' => [],
                 ],
             ];
 
@@ -149,6 +151,13 @@ function getUserFunc($userID){
                 $created_meal->id = $row->created_meal_id;
                 if (!in_array($created_meal, $data['data']['created_meals'])) {
                     $data['data']['created_meals'][] = $created_meal;
+                }
+
+                $user_weight = new stdClass();
+                $user_weight->weight = $row->user_weight;
+                $user_weight->date = $row->user_weight_date;
+                if (!in_array($user_weight, $data['data']['user_weights'])) {
+                    $data['data']['user_weights'][] = $user_weight;
                 }
         
             }
@@ -227,6 +236,45 @@ function loginUserFunc($loginUser){
         ];
         header("HTTP/1.0 500 Not Found");
         return json_encode($data);
+    }
+
+}
+
+function addLikedMealFunc($addLikedMeal){
+    global $conn;
+
+    $userID = mysqli_real_escape_string($conn, $addLikedMeal['userID']);
+    $mealID = mysqli_real_escape_string($conn, $addLikedMeal['mealID']);
+
+    if (empty(trim($userID))){
+
+        return error422('Enter userID');
+
+    } elseif (empty(trim($mealID))){
+
+        return error422('Enter mealID');
+
+    } else {
+        $query = "INSERT INTO react_php_liked_recipe (userID, mealID) VALUES ('$userID', '$mealID')";
+        $result = mysqli_query($conn, $query);
+
+        if ($result){
+            
+            $data = [
+                'status' => 201,
+                'message' => 'Meal Liked Successfully',
+            ];
+            header("HTTP/1.0 201 Created");
+            return json_encode($data);
+
+        } else {
+            $data = [
+                'status' => 500,
+                'messeage' => 'Internal Server Error',
+            ];
+            header("HTTP/1.0 500 Internal Server Error");
+            return json_encode($data);
+        }
     }
 
 }
