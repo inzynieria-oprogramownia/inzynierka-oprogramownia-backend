@@ -4,18 +4,3 @@ Header set Access-Control-Allow-Origin *
 
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME} !-f
-RewriteRule ^ meal/addMeal.php [L]
-RewriteRule ^ user/addUser.php [L]
-RewriteRule ^ user/getMeal.php [L]
-RewriteRule ^ user/getMeals.php [L]
-RewriteRule ^ user/getUser.php [L]
-RewriteRule ^ user/getUsers.php [L]
-RewriteRule ^ user/addLikedMeal.php [L]
-RewriteRule ^ user/login.php [L]
-RewriteRule ^ user/blog/addPost.php [L]
-RewriteRule ^ user/blog/getPost.php [L]
-RewriteRule ^ user/blog/comments/addComment.php [L]
-RewriteRule ^ user/blog/comments/getComment.php [L]
-RewriteRule ^ user/blog/comments/getComments.php [L]
-RewriteRule ^ user/blog/weight/addWeight.php [L]
-RewriteRule ^ user/blog/weight/getWeight.php [L]
