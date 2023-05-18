@@ -24,9 +24,9 @@ function getAllUsers(){
         } else {
             $data = [
                 'status' => 404,
-                'messeage' => 'No Customer Fount',
+                'messeage' => 'No Customer Found',
             ];
-            header("HTTP/1.0 404 No Customer Fount");
+            header("HTTP/1.0 404 No Customer Found");
             return json_encode($data);
         }
 
@@ -97,13 +97,10 @@ function addUserFunc($addUser){
 
 
 function getUserFunc($userID){
-
     global $conn;
 
     if ($userID['id'] == null){
-
         return error422('Enter your user ID');
-
     } 
 
     $ID = mysqli_real_escape_string($conn, $userID['id']);
@@ -117,7 +114,7 @@ function getUserFunc($userID){
     WHERE u.id='$ID'
     GROUP BY u.id, lr.mealID, rec.id, w.weight, w.date;";
 
-    $result = mysqli_query($conn,$query);
+    $result = mysqli_query($conn, $query);
 
     if ($result){
         
@@ -125,7 +122,7 @@ function getUserFunc($userID){
 
             $data = [
                 'status' => 200,
-                'messeage' => 'User Found',
+                'message' => 'User Found',
                 'data' => [
                     'liked_meals' => [],
                     'created_meals' => [],
@@ -140,49 +137,52 @@ function getUserFunc($userID){
                     $data['data']['email'] = $row->email;
                     $data['data']['password'] = $row->password;
                 }
-            
-                $liked_meal = new stdClass();
-                $liked_meal->id = $row->liked_meal_id;
-                if (!in_array($liked_meal, $data['data']['liked_meals'])) {
-                    $data['data']['liked_meals'][] = $liked_meal;
+
+                if ($row->liked_meal_id != null) {
+                    $liked_meal = new stdClass();
+                    $liked_meal->id = $row->liked_meal_id;
+                    if (!in_array($liked_meal, $data['data']['liked_meals'])) {
+                        $data['data']['liked_meals'][] = $liked_meal;
+                    }
                 }
 
-                $created_meal = new stdClass();
-                $created_meal->id = $row->created_meal_id;
-                if (!in_array($created_meal, $data['data']['created_meals'])) {
-                    $data['data']['created_meals'][] = $created_meal;
+                if ($row->created_meal_id != null) {
+                    $created_meal = new stdClass();
+                    $created_meal->id = $row->created_meal_id;
+                    if (!in_array($created_meal, $data['data']['created_meals'])) {
+                        $data['data']['created_meals'][] = $created_meal;
+                    }
                 }
 
-                $user_weight = new stdClass();
-                $user_weight->weight = $row->user_weight;
-                $user_weight->date = $row->user_weight_date;
-                if (!in_array($user_weight, $data['data']['user_weights'])) {
-                    $data['data']['user_weights'][] = $user_weight;
+                if ($row->user_weight != null) {
+                    $user_weight = new stdClass();
+                    $user_weight->weight = $row->user_weight;
+                    $user_weight->date = $row->user_weight_date;
+                    if (!in_array($user_weight, $data['data']['user_weights'])) {
+                        $data['data']['user_weights'][] = $user_weight;
+                    }
                 }
-        
             }
-
             header("HTTP/1.0 200 Success");
             return json_encode($data);
 
         } else {
             $data = [
                 'status' => 404,
-                'messeage' => 'No User Found',
+                'message' => 'No User Found',
             ];
-            header("HTTP/1.0 500 Not Found");
+            header("HTTP/1.0 404 Not Found");
             return json_encode($data);
         }
 
     } else {
         $data = [
             'status' => 500,
-            'messeage' => 'Internal Server Error',
+            'message' => 'Internal Server Error',
         ];
         header("HTTP/1.0 500 Internal Server Error");
         return json_encode($data);
     }
-
 }
 
 
