@@ -306,11 +306,14 @@ function getLikedMealsFunc($userid){
                 ],
             ];
 
+            $meals = []; 
+
             while ($row = mysqli_fetch_object($result)) {
                 $mealId = $row->id;
 
-                if (!isset($data['data']['meals'][$mealId])) {
-                    $data['data']['meals'][$mealId] = [
+                if (!isset($meals[$mealId])) {
+                    $meals[$mealId] = [
+                        'id' => $row->id, 
                         'title' => $row->title,
                         'image' => $row->image,
                         'date' => $row->date,
@@ -326,10 +329,12 @@ function getLikedMealsFunc($userid){
                 $ingredient = new stdClass();
                 $ingredient->name = $row->name;
                 $ingredient->weight = $row->weight;
-                if (!in_array($ingredient, $data['data']['meals'][$mealId]['ingredients'])) {
-                    $data['data']['meals'][$mealId]['ingredients'][] = $ingredient;
+                if (!in_array($ingredient, $meals[$mealId]['ingredients'])) {
+                    $meals[$mealId]['ingredients'][] = $ingredient;
                 }
             }
+
+            $data['data']['meals'] = array_values($meals);
 
             header("HTTP/1.0 200 Success");
             return json_encode($data);
@@ -352,6 +357,7 @@ function getLikedMealsFunc($userid){
 }
 
 
+
 function getCreatedMealsFunc($userid){
     global $conn;
 
@@ -365,7 +371,7 @@ function getCreatedMealsFunc($userid){
     FROM react_php_recipe AS rec
     LEFT JOIN react_php_ingredient AS ing ON ing.mealid = rec.id
     WHERE rec.userID='$ID'
-    ORDER BY rec.id";
+    ORDER BY rec.id;";
 
     $result = mysqli_query($conn, $query);
 
@@ -379,11 +385,14 @@ function getCreatedMealsFunc($userid){
                 ],
             ];
 
+            $meals = [];
+
             while ($row = mysqli_fetch_object($result)) {
                 $id = $row->id;
 
-                if (!isset($data['data']['meals'][$id])) {
-                    $data['data']['meals'][$id] = [
+                if (!isset($meals[$id])) {
+                    $meals[$id] = [
+                        'id' => $id,
                         'title' => $row->title,
                         'image' => $row->image,
                         'date' => $row->date,
@@ -400,9 +409,11 @@ function getCreatedMealsFunc($userid){
                     $ingredient = new stdClass();
                     $ingredient->name = $row->name;
                     $ingredient->weight = $row->weight;
-                    $data['data']['meals'][$id]['ingredients'][] = $ingredient;
+                    $meals[$id]['ingredients'][] = $ingredient;
                 }
             }
+
+            $data['data']['meals'] = array_values($meals);
 
             header("HTTP/1.0 200 Success");
             return json_encode($data);
@@ -423,7 +434,6 @@ function getCreatedMealsFunc($userid){
         return json_encode($data);
     }
 }
-
 
 
 ?>
