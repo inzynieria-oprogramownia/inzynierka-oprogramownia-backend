@@ -247,11 +247,14 @@ function getUsersPostFunc($getPost) {
             ],
         ];
 
+        $posts = []; // Tablica pomocnicza do grupowania sekcji i komentarzy według ID posta
+
         while ($row = mysqli_fetch_object($result)) {
             $postId = $row->id;
 
-            if (!isset($data['data']['posts'][$postId])) {
-                $data['data']['posts'][$postId] = [
+            if (!isset($posts[$postId])) {
+                $posts[$postId] = [
+                    'id' => $postId, // Dodanie ID obiektu
                     'title' => $row->title,
                     'image' => $row->image,
                     'date' => $row->date,
@@ -263,17 +266,20 @@ function getUsersPostFunc($getPost) {
             $section = new stdClass();
             $section->name = $row->section_name;
             $section->description = $row->section_description;
-            if (!in_array($section, $data['data']['posts'][$postId]['sections'])) {
-                $data['data']['posts'][$postId]['sections'][] = $section;
+            if (!in_array($section, $posts[$postId]['sections'])) {
+                $posts[$postId]['sections'][] = $section;
             }
         
             $comment = new stdClass();
             $comment->login = $row->login;
             $comment->comment = $row->comment;
-            if (!in_array($comment, $data['data']['posts'][$postId]['comments'])) {
-                $data['data']['posts'][$postId]['comments'][] = $comment;
+            if (!in_array($comment, $posts[$postId]['comments'])) {
+                $posts[$postId]['comments'][] = $comment;
             }
         }
+
+        // Konwersja tablicy pomocniczej na indeksowaną tablicę wynikową
+        $data['data']['posts'] = array_values($posts);
 
         header("HTTP/1.0 200 Success");
         return json_encode($data);
@@ -286,6 +292,8 @@ function getUsersPostFunc($getPost) {
         return json_encode($data);
     }
 }
+
+
 
 
 ?>
