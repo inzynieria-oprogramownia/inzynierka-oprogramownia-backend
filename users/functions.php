@@ -352,4 +352,78 @@ function getLikedMealsFunc($userid){
 }
 
 
+function getCreatedMealsFunc($userid){
+    global $conn;
+
+    if ($userid['userid'] == null){
+        return error422('Enter your user ID');
+    }
+
+    $ID = mysqli_real_escape_string($conn, $userid['userid']);
+
+    $query = "SELECT rec.id, rec.image, rec.title, rec.date, rec.description, rec.time, rec.people, rec.kcal, rec.mealoption, ing.name, ing.weight
+    FROM react_php_recipe AS rec
+    LEFT JOIN react_php_ingredient AS ing ON ing.mealid = rec.id
+    WHERE rec.userID='$ID'
+    ORDER BY rec.id";
+
+    $result = mysqli_query($conn, $query);
+
+    if ($result){
+        if (mysqli_num_rows($result) > 0) {
+            $data = [
+                'status' => 200,
+                'message' => 'Created Meals Found',
+                'data' => [
+                    'meals' => [],
+                ],
+            ];
+
+            while ($row = mysqli_fetch_object($result)) {
+                $id = $row->id;
+
+                if (!isset($data['data']['meals'][$id])) {
+                    $data['data']['meals'][$id] = [
+                        'title' => $row->title,
+                        'image' => $row->image,
+                        'date' => $row->date,
+                        'description' => $row->description,
+                        'time' => $row->time,
+                        'people' => $row->people,
+                        'kcal' => $row->kcal,
+                        'mealoption' => $row->mealoption,
+                        'ingredients' => [],
+                    ];
+                }
+            
+                if (!empty($row->name) && !empty($row->weight)) {
+                    $ingredient = new stdClass();
+                    $ingredient->name = $row->name;
+                    $ingredient->weight = $row->weight;
+                    $data['data']['meals'][$id]['ingredients'][] = $ingredient;
+                }
+            }
+
+            header("HTTP/1.0 200 Success");
+            return json_encode($data);
+        } else {
+            $data = [
+                'status' => 404,
+                'message' => 'No Created Meals Found',
+            ];
+            header("HTTP/1.0 404 Not Found");
+            return json_encode($data);
+        }
+    } else {
+        $data = [
+            'status' => 500,
+            'message' => 'Internal Server Error',
+        ];
+        header("HTTP/1.0 500 Internal Server Error");
+        return json_encode($data);
+    }
+}
+
+
+
 ?>
