@@ -13,10 +13,8 @@ function error422($mess){
 }
  
 function addMealFunc($addMeal){
- 
     global $conn;
- 
-    $backgroundImage = mysqli_real_escape_string($conn, $addMeal['image']);
+
     $userID = mysqli_real_escape_string($conn, $addMeal['userID']);
     $title = mysqli_real_escape_string($conn, $addMeal['title']);
     $date = date('Y.m.d');
@@ -25,85 +23,86 @@ function addMealFunc($addMeal){
     $people = mysqli_real_escape_string($conn, $addMeal['people']);
     $kcal = mysqli_real_escape_string($conn, $addMeal['kcal']);
     $mealoption = mysqli_real_escape_string($conn, $addMeal['mealoption']);
- 
-    if (empty(trim($backgroundImage))) {
- 
-        return error422('Enter meal image');
- 
-    } elseif (empty(trim($userID))) {
- 
+
+    if (empty(trim($userID))) {
         return error422('Enter userID');
- 
     } elseif (empty(trim($title))) {
- 
         return error422('Enter meal name');
- 
     } elseif (empty(trim($description))) {
- 
         return error422('Enter meal description');
- 
     } elseif (empty(trim($time))) {
- 
         return error422('Enter preparation time');
- 
     } elseif (empty(trim($people))) {
- 
         return error422('Enter for how many people this meal is');
- 
     } elseif (empty(trim($kcal))) {
- 
         return error422('Enter meal kcal');
- 
     } elseif (empty(trim($mealoption))) {
- 
         return error422('Enter meal type');
- 
     } else {
-        $query = "INSERT INTO react_php_recipe (userID, image, title, date, description, time, people, kcal, mealoption) VALUES ('$userID', '$backgroundImage' , '$title', '$date', '$description', '$time', '$people', '$kcal', '$mealoption')";
-        $result = mysqli_query($conn, $query);
- 
-        if ($result){
-            $mealId = mysqli_insert_id($conn);
- 
- 
-            if (isset($addMeal['ingredient']) && is_array($addMeal['ingredient'])) {
-                $ingredients = $addMeal['ingredient'];
- 
-                foreach ($ingredients as $ingredient) {
-                    $ingredientName = mysqli_real_escape_string($conn, $ingredient['name']);
-                    $ingredientWeight = mysqli_real_escape_string($conn, $ingredient['weight']);
-                    $ingredientQuery = "INSERT INTO react_php_ingredient (mealid, name, weight) VALUES ('$mealId', '$ingredientName', '$ingredientWeight')";
-                    $ingredientResult = mysqli_query($conn, $ingredientQuery);
- 
-                    if(!$ingredientResult) {
-                        $data = [
-                            'status' => 500,
-                            'message' => 'Internal Server Error',
-                        ];
-                        header("HTTP/1.0 500 Internal Server Error");
-                        return json_encode($data);
+        $imageFileName = $_FILES["uploadfile"]["name"];
+        $imageFileType = strtolower(pathinfo($imageFileName, PATHINFO_EXTENSION));
+        $allowedExtensions = array('jpg', 'jpeg', 'png');
+        
+        if (!in_array($imageFileType, $allowedExtensions)) {
+            return error422('Invalid image file type');
+        }
+
+        $targetDirectory = 'meal_images/'.$userID.'/';
+        $targetFile = $targetDirectory . basename($imageFileName);
+
+        if (move_uploaded_file($backgroundImage, $targetFile)) {
+            $query = "INSERT INTO react_php_recipe (userID, image, title, date, description, time, people, kcal, mealoption) VALUES ('$userID', '$targetFile', '$title', '$date', '$description', '$time', '$people', '$kcal', '$mealoption')";
+            $result = mysqli_query($conn, $query);
+
+            if ($result) {
+                $mealId = mysqli_insert_id($conn);
+
+                if (isset($addMeal['ingredient']) && is_array($addMeal['ingredient'])) {
+                    $ingredients = $addMeal['ingredient'];
+
+                    foreach ($ingredients as $ingredient) {
+                        $ingredientName = mysqli_real_escape_string($conn, $ingredient['name']);
+                        $ingredientWeight = mysqli_real_escape_string($conn, $ingredient['weight']);
+                        $ingredientQuery = "INSERT INTO react_php_ingredient (mealid, name, weight) VALUES ('$mealId', '$ingredientName', '$ingredientWeight')";
+                        $ingredientResult = mysqli_query($conn, $ingredientQuery);
+
+                        if(!$ingredientResult) {
+                            $data = [
+                                'status' => 500,
+                                'message' => 'Internal Server Error',
+                            ];
+                            header("HTTP/1.0 500 Internal Server Error");
+                            return json_encode($data);
+                        }
                     }
                 }
+
+                $data = [
+                    'status' => 201,
+                    'message' => 'Meal Added Successfully',
+                ];
+                header("HTTP/1.0 201 Created"); 
+                return json_encode($data);
+
+            } else {
+                $data = [
+                    'status' => 500,
+                    'message' => 'Internal Server Error',
+                ];
+                header("HTTP/1.0 500 Internal Server Error");
+                return json_encode($data);
             }
- 
-            $data = [
-                'status' => 201,
-                'message' => 'Meal Added Successfully',
-            ];
-            header("HTTP/1.0 201 Created"); 
-            return json_encode($data);
- 
         } else {
             $data = [
                 'status' => 500,
-                'messeage' => 'Internal Server Error',
+                'message' => 'Failed to upload image',
             ];
             header("HTTP/1.0 500 Internal Server Error");
             return json_encode($data);
         }
     }
- 
 }
+
  
 function getMealFunc($mealID){
  
