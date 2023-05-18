@@ -220,4 +220,80 @@ function getPostsFunc(){
 }
 
 
+function getUsersPostFunc($getPost) {
+    global $conn;
+
+    if ($getPost['userid'] == null) {
+        return error422('Enter user ID');
+    } 
+
+    $ID = mysqli_real_escape_string($conn, $getPost['userid']);
+
+    $query = "SELECT b.id, b.title, b.image, b.date, bs.name AS section_name, bs.description AS section_description, u.login, c.comment
+    FROM react_php_blog AS b 
+    JOIN react_php_blog_sections AS bs ON bs.postid = b.id
+    JOIN react_php_comments AS c ON c.postid = b.id
+    JOIN react_php_users AS u ON u.id=c.userid
+    WHERE b.userid = '$ID'";
+
+    $result = mysqli_query($conn, $query);
+
+    if ($result) {
+        $data = [
+            'status' => 200,
+            'message' => 'Users Post Found',
+            'data' => [
+                'posts' => [],
+            ],
+        ];
+
+        $posts = []; // Tablica pomocnicza do grupowania sekcji i komentarzy według ID posta
+
+        while ($row = mysqli_fetch_object($result)) {
+            $postId = $row->id;
+
+            if (!isset($posts[$postId])) {
+                $posts[$postId] = [
+                    'id' => $postId, // Dodanie ID obiektu
+                    'title' => $row->title,
+                    'image' => $row->image,
+                    'date' => $row->date,
+                    'sections' => [],
+                    'comments' => [],
+                ];
+            }
+        
+            $section = new stdClass();
+            $section->name = $row->section_name;
+            $section->description = $row->section_description;
+            if (!in_array($section, $posts[$postId]['sections'])) {
+                $posts[$postId]['sections'][] = $section;
+            }
+        
+            $comment = new stdClass();
+            $comment->login = $row->login;
+            $comment->comment = $row->comment;
+            if (!in_array($comment, $posts[$postId]['comments'])) {
+                $posts[$postId]['comments'][] = $comment;
+            }
+        }
+
+        // Konwersja tablicy pomocniczej na indeksowaną tablicę wynikową
+        $data['data']['posts'] = array_values($posts);
+
+        header("HTTP/1.0 200 Success");
+        return json_encode($data);
+    } else {
+        $data = [
+            'status' => 500,
+            'message' => 'Internal Server Error',
+        ];
+        header("HTTP/1.0 500 Internal Server Error");
+        return json_encode($data);
+    }
+}
+
+
+
+
 ?>

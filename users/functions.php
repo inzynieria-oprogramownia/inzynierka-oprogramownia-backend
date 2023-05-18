@@ -279,5 +279,161 @@ function addLikedMealFunc($addLikedMeal){
 
 }
 
+function getLikedMealsFunc($userid){
+    global $conn;
+
+    if ($userid['userid'] == null){
+        return error422('Enter your user ID');
+    }
+
+    $ID = mysqli_real_escape_string($conn, $userid['userid']);
+
+    $query = "SELECT rec.id, rec.image, rec.title, rec.date, rec.description, rec.time, rec.people, rec.kcal, rec.mealoption, ing.name, ing.weight
+    FROM react_php_liked_recipe AS lr
+    JOIN react_php_recipe AS rec ON rec.id = lr.mealID 
+    JOIN react_php_ingredient AS ing ON ing.mealid = rec.id
+    WHERE lr.userID='$ID';";
+
+    $result = mysqli_query($conn,$query);
+
+    if ($result){
+        if (mysqli_num_rows($result) > 0) {
+            $data = [
+                'status' => 200,
+                'message' => 'Liked Meals Found',
+                'data' => [
+                    'meals' => [],
+                ],
+            ];
+
+            $meals = []; 
+
+            while ($row = mysqli_fetch_object($result)) {
+                $mealId = $row->id;
+
+                if (!isset($meals[$mealId])) {
+                    $meals[$mealId] = [
+                        'id' => $row->id, 
+                        'title' => $row->title,
+                        'image' => $row->image,
+                        'date' => $row->date,
+                        'description' => $row->description,
+                        'time' => $row->time,
+                        'people' => $row->people,
+                        'kcal' => $row->kcal,
+                        'mealoption' => $row->mealoption,
+                        'ingredients' => [],
+                    ];
+                }
+            
+                $ingredient = new stdClass();
+                $ingredient->name = $row->name;
+                $ingredient->weight = $row->weight;
+                if (!in_array($ingredient, $meals[$mealId]['ingredients'])) {
+                    $meals[$mealId]['ingredients'][] = $ingredient;
+                }
+            }
+
+            $data['data']['meals'] = array_values($meals);
+
+            header("HTTP/1.0 200 Success");
+            return json_encode($data);
+        } else {
+            $data = [
+                'status' => 404,
+                'message' => 'No Liked Meals Found',
+            ];
+            header("HTTP/1.0 404 Not Found");
+            return json_encode($data);
+        }
+    } else {
+        $data = [
+            'status' => 500,
+            'message' => 'Internal Server Error',
+        ];
+        header("HTTP/1.0 500 Internal Server Error");
+        return json_encode($data);
+    }
+}
+
+
+
+function getCreatedMealsFunc($userid){
+    global $conn;
+
+    if ($userid['userid'] == null){
+        return error422('Enter your user ID');
+    }
+
+    $ID = mysqli_real_escape_string($conn, $userid['userid']);
+
+    $query = "SELECT rec.id, rec.image, rec.title, rec.date, rec.description, rec.time, rec.people, rec.kcal, rec.mealoption, ing.name, ing.weight
+    FROM react_php_recipe AS rec
+    LEFT JOIN react_php_ingredient AS ing ON ing.mealid = rec.id
+    WHERE rec.userID='$ID'
+    ORDER BY rec.id;";
+
+    $result = mysqli_query($conn, $query);
+
+    if ($result){
+        if (mysqli_num_rows($result) > 0) {
+            $data = [
+                'status' => 200,
+                'message' => 'Created Meals Found',
+                'data' => [
+                    'meals' => [],
+                ],
+            ];
+
+            $meals = [];
+
+            while ($row = mysqli_fetch_object($result)) {
+                $id = $row->id;
+
+                if (!isset($meals[$id])) {
+                    $meals[$id] = [
+                        'id' => $id,
+                        'title' => $row->title,
+                        'image' => $row->image,
+                        'date' => $row->date,
+                        'description' => $row->description,
+                        'time' => $row->time,
+                        'people' => $row->people,
+                        'kcal' => $row->kcal,
+                        'mealoption' => $row->mealoption,
+                        'ingredients' => [],
+                    ];
+                }
+            
+                if (!empty($row->name) && !empty($row->weight)) {
+                    $ingredient = new stdClass();
+                    $ingredient->name = $row->name;
+                    $ingredient->weight = $row->weight;
+                    $meals[$id]['ingredients'][] = $ingredient;
+                }
+            }
+
+            $data['data']['meals'] = array_values($meals);
+
+            header("HTTP/1.0 200 Success");
+            return json_encode($data);
+        } else {
+            $data = [
+                'status' => 404,
+                'message' => 'No Created Meals Found',
+            ];
+            header("HTTP/1.0 404 Not Found");
+            return json_encode($data);
+        }
+    } else {
+        $data = [
+            'status' => 500,
+            'message' => 'Internal Server Error',
+        ];
+        header("HTTP/1.0 500 Internal Server Error");
+        return json_encode($data);
+    }
+}
+
 
 ?>

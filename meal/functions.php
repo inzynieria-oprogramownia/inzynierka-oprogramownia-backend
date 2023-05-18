@@ -1,7 +1,7 @@
 <?PHP
-
+ 
 require '..\DBconnect.php';
-
+ 
 function error422($mess){
     $data = [
         'status' => 422,
@@ -11,12 +11,12 @@ function error422($mess){
     echo json_encode($data);
     exit();
 }
-
+ 
 function addMealFunc($addMeal){
-    
+ 
     global $conn;
-
-    $backgroundImage = mysqli_real_escape_string($conn, $addMeal['backgroundImage']);
+ 
+    $backgroundImage = mysqli_real_escape_string($conn, $addMeal['image']);
     $userID = mysqli_real_escape_string($conn, $addMeal['userID']);
     $title = mysqli_real_escape_string($conn, $addMeal['title']);
     $date = date('Y.m.d');
@@ -25,56 +25,56 @@ function addMealFunc($addMeal){
     $people = mysqli_real_escape_string($conn, $addMeal['people']);
     $kcal = mysqli_real_escape_string($conn, $addMeal['kcal']);
     $mealoption = mysqli_real_escape_string($conn, $addMeal['mealoption']);
-
+ 
     if (empty(trim($backgroundImage))) {
-
-        return error422('Enter meal backgroundImage');
-
+ 
+        return error422('Enter meal image');
+ 
     } elseif (empty(trim($userID))) {
-
+ 
         return error422('Enter userID');
-
+ 
     } elseif (empty(trim($title))) {
-
+ 
         return error422('Enter meal name');
-
+ 
     } elseif (empty(trim($description))) {
-
+ 
         return error422('Enter meal description');
-
+ 
     } elseif (empty(trim($time))) {
-
+ 
         return error422('Enter preparation time');
-
+ 
     } elseif (empty(trim($people))) {
-
+ 
         return error422('Enter for how many people this meal is');
-
+ 
     } elseif (empty(trim($kcal))) {
-
+ 
         return error422('Enter meal kcal');
-
+ 
     } elseif (empty(trim($mealoption))) {
-
+ 
         return error422('Enter meal type');
-
+ 
     } else {
-        $query = "INSERT INTO react_php_recipe (userID, backgroundImage, title, date, description, time, people, kcal, mealoption) VALUES ('$userID', '$backgroundImage' , '$title', '$date', '$description', '$time', '$people', '$kcal', '$mealoption')";
+        $query = "INSERT INTO react_php_recipe (userID, image, title, date, description, time, people, kcal, mealoption) VALUES ('$userID', '$backgroundImage' , '$title', '$date', '$description', '$time', '$people', '$kcal', '$mealoption')";
         $result = mysqli_query($conn, $query);
-
+ 
         if ($result){
             $mealId = mysqli_insert_id($conn);
-
-
+ 
+ 
             if (isset($addMeal['ingredient']) && is_array($addMeal['ingredient'])) {
                 $ingredients = $addMeal['ingredient'];
-
+ 
                 foreach ($ingredients as $ingredient) {
                     $ingredientName = mysqli_real_escape_string($conn, $ingredient['name']);
                     $ingredientWeight = mysqli_real_escape_string($conn, $ingredient['weight']);
                     $ingredientQuery = "INSERT INTO react_php_ingredient (mealid, name, weight) VALUES ('$mealId', '$ingredientName', '$ingredientWeight')";
                     $ingredientResult = mysqli_query($conn, $ingredientQuery);
-
+ 
                     if(!$ingredientResult) {
                         $data = [
                             'status' => 500,
@@ -85,14 +85,14 @@ function addMealFunc($addMeal){
                     }
                 }
             }
-
+ 
             $data = [
                 'status' => 201,
                 'message' => 'Meal Added Successfully',
             ];
             header("HTTP/1.0 201 Created"); 
             return json_encode($data);
-
+ 
         } else {
             $data = [
                 'status' => 500,
@@ -102,33 +102,33 @@ function addMealFunc($addMeal){
             return json_encode($data);
         }
     }
-
+ 
 }
-
+ 
 function getMealFunc($mealID){
-
+ 
     global $conn;
-
+ 
     if ($mealID['id'] == null){
-
+ 
         return error422('Enter meal ID');
-
+ 
     } 
-
+ 
     $ID = mysqli_real_escape_string($conn, $mealID['id']);
-
+ 
     $query = "SELECT r.backgroundImage, r.title, r.date, r.description, r.time, r.people, r.kcal, r.mealoption, ing.name AS ingredient_name, ing.weight AS ingredient_weight
           FROM react_php_recipe as r
           JOIN react_php_ingredient as ing ON r.id = ing.mealid
           WHERE r.id = '$ID'";
-
-
+ 
+ 
     $result = mysqli_query($conn,$query);
-
+ 
     if ($result){
-        
+ 
         if (mysqli_num_rows($result) > 0) {
-
+ 
             $data = [
                 'status' => 200,
                 'messeage' => 'Meal Found',
@@ -136,7 +136,7 @@ function getMealFunc($mealID){
                     'ingredients' => [],
                 ]
             ];
-
+ 
             while ($row = mysqli_fetch_object($result)) {
                 if (!isset($data['data']['title'])) {
                     $data['data']['title'] = $row->title;
@@ -148,7 +148,7 @@ function getMealFunc($mealID){
                     $data['data']['kcal'] = $row->kcal;
                     $data['data']['mealoption'] = $row->mealoption;
                 }
-            
+ 
                 $ingredient = new stdClass();
                 $ingredient->name = $row->ingredient_name;
                 $ingredient->weight = $row->ingredient_weight;
@@ -156,13 +156,13 @@ function getMealFunc($mealID){
                     $data['data']['ingredients'][] = $ingredient;
                 }
             }
-
-
-
-
+ 
+ 
+ 
+ 
             header("HTTP/1.0 200 Success");
             return json_encode($data);
-
+ 
         } else {
             $data = [
                 'status' => 404,
@@ -171,7 +171,7 @@ function getMealFunc($mealID){
             header("HTTP/1.0 500 Not Found");
             return json_encode($data);
         }
-
+ 
     } else {
         $data = [
             'status' => 500,
@@ -180,21 +180,21 @@ function getMealFunc($mealID){
         header("HTTP/1.0 500 Internal Server Error");
         return json_encode($data);
     }
-
+ 
 }
-
-
+ 
+ 
 function getAllMealsFunc(){
     global $conn;
-
+ 
     $query = "SELECT backgroundImage, title, date, description, time, people, kcal, mealoption FROM react_php_recipe";
     $result = mysqli_query($conn, $query);
-
+ 
     if ($result){
         if (mysqli_num_rows($result) > 0){
-
+ 
             $res = mysqli_fetch_all($result,MYSQLI_ASSOC);
-
+ 
             $data = [
                 'status' => 200,
                 'message' => 'Meal List Fetched Successfully',
@@ -202,7 +202,7 @@ function getAllMealsFunc(){
             ];
             header("HTTP/1.0 200 Meal List Fetched Successfully");
             return json_encode($data);
-
+ 
         } else {
             $data = [
                 'status' => 404,
@@ -211,8 +211,8 @@ function getAllMealsFunc(){
             header("HTTP/1.0 404 No Meal Found");
             return json_encode($data);
         }
-
-
+ 
+ 
     } else {
         $data = [
             'status' => 500,
@@ -222,5 +222,5 @@ function getAllMealsFunc(){
         return json_encode($data);
     }
 }
-
+ 
 ?>
