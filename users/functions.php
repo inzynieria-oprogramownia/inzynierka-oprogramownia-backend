@@ -24,9 +24,9 @@ function getAllUsers(){
         } else {
             $data = [
                 'status' => 404,
-                'messeage' => 'No Customer Fount',
+                'messeage' => 'No Customer Found',
             ];
-            header("HTTP/1.0 404 No Customer Fount");
+            header("HTTP/1.0 404 No Customer Found");
             return json_encode($data);
         }
 
