@@ -141,23 +141,28 @@ function getUserFunc($userID){
                 if ($row->liked_meal_id != null) {
                     $liked_meal = new stdClass();
                     $liked_meal->id = $row->liked_meal_id;
-                    $data['data']['liked_meals'][] = $liked_meal;
+                    if (!in_array($liked_meal, $data['data']['liked_meals'])) {
+                        $data['data']['liked_meals'][] = $liked_meal;
+                    }
                 }
 
                 if ($row->created_meal_id != null) {
                     $created_meal = new stdClass();
                     $created_meal->id = $row->created_meal_id;
-                    $data['data']['created_meals'][] = $created_meal;
+                    if (!in_array($created_meal, $data['data']['created_meals'])) {
+                        $data['data']['created_meals'][] = $created_meal;
+                    }
                 }
 
                 if ($row->user_weight != null) {
                     $user_weight = new stdClass();
                     $user_weight->weight = $row->user_weight;
                     $user_weight->date = $row->user_weight_date;
-                    $data['data']['user_weights'][] = $user_weight;
+                    if (!in_array($user_weight, $data['data']['user_weights'])) {
+                        $data['data']['user_weights'][] = $user_weight;
+                    }
                 }
             }
-
             header("HTTP/1.0 200 Success");
             return json_encode($data);
 
