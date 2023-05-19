@@ -2,7 +2,8 @@
 
 require '..\..\DBconnect.php';
 
-function error422($mess){
+function error422($mess)
+{
     $data = [
         'status' => 422,
         'messeage' => $mess,
@@ -12,56 +13,81 @@ function error422($mess){
     exit();
 }
 
-function addPostFunc($addPost){
+function addPostFunc($addPost)
+{
     global $conn;
 
     $title = mysqli_real_escape_string($conn, $addPost['title']);
-    $image = mysqli_real_escape_string($conn, $addPost['image']);
+    $userID = mysqli_real_escape_string($conn, $addPost['userID']);
     $date = date('Y.m.d');
 
-    if (empty(trim($title))){
+    if (empty(trim($title))) {
 
         return error422('Enter title');
 
-    } elseif (empty(trim($image))){
+    } elseif (empty(trim($userID))) {
 
-        return error422('Enter image');
+        return error422('Enter userID');
 
     } else {
-        $query = "INSERT INTO react_php_blog (title, image, date) VALUES ('$title', '$image', '$date')";
-        $result = mysqli_query($conn, $query);
+        $targetDirectory = 'post_image/' . $userID . '/';
+        if (!is_dir($targetDirectory)) {
+            mkdir($targetDirectory, 0755, true);
+        }
+        $targetFile = $targetDirectory . basename($_FILES["image"]["name"]);
 
-        if ($result){
-            $postId = mysqli_insert_id($conn);
+        $imageFileType = strtolower(pathinfo($targetFile, PATHINFO_EXTENSION));
+        $allowedExtensions = array('jpg', 'jpeg', 'png');
 
-            if (isset($addPost['sections']) && is_array($addPost['sections'])) {
-                $sections = $addPost['sections'];
+        if (!in_array($imageFileType, $allowedExtensions)) {
+            return error422('Invalid image file type');
+        }
 
-                foreach ($sections as $section) {
-                    $sectionName = mysqli_real_escape_string($conn, $section['name']);
-                    $sectionDescription = mysqli_real_escape_string($conn, $section['description']);
-                    $sectionQuery = "INSERT INTO react_php_blog_sections (postid, name, description) VALUES ('$postId', '$sectionName', '$sectionDescription')";
-                    $sectionResult = mysqli_query($conn, $sectionQuery);
+        if (move_uploaded_file($_FILES["image"]["tmp_name"], $targetFile)) {
 
-                    if(!$sectionResult) {
-                        $data = [
-                            'status' => 500,
-                            'message' => 'Internal Server Error',
-                        ];
-                        header("HTTP/1.0 500 Internal Server Error");
-                        return json_encode($data);
+            $query = "INSERT INTO react_php_blog (userid, title, image, date) VALUES ('$userID', '$title', '$targetFile', '$date')";
+            $result = mysqli_query($conn, $query);
+
+            if ($result) {
+                $postId = mysqli_insert_id($conn);
+
+                if (isset($addPost['sections']) && is_array($addPost['sections'])) {
+                    $sections = $addPost['sections'];
+
+                    foreach ($sections as $section) {
+                        $sectionName = mysqli_real_escape_string($conn, $section['name']);
+                        $sectionDescription = mysqli_real_escape_string($conn, $section['description']);
+                        $sectionQuery = "INSERT INTO react_php_blog_sections (postid, name, description) VALUES ('$postId', '$sectionName', '$sectionDescription')";
+                        $sectionResult = mysqli_query($conn, $sectionQuery);
+
+                        if (!$sectionResult) {
+                            $data = [
+                                'status' => 500,
+                                'message' => 'Internal Server Error',
+                            ];
+                            header("HTTP/1.0 500 Internal Server Error");
+                            return json_encode($data);
+                        }
                     }
                 }
+
+
+                $data = [
+                    'status' => 201,
+                    'message' => 'Post Created Successfully',
+                ];
+                header("HTTP/1.0 201 Created");
+                return json_encode($data);
+
+
+            } else {
+                $data = [
+                    'status' => 500,
+                    'messeage' => 'Internal Server Error',
+                ];
+                header("HTTP/1.0 500 Internal Server Error");
+                return json_encode($data);
             }
-
-            
-            $data = [
-                'status' => 201,
-                'message' => 'Post Created Successfully',
-            ];
-            header("HTTP/1.0 201 Created");
-            return json_encode($data);
-
         } else {
             $data = [
                 'status' => 500,
@@ -75,12 +101,13 @@ function addPostFunc($addPost){
 }
 
 
-function getPostFunc($getPost) {
+function getPostFunc($getPost)
+{
     global $conn;
 
     if ($getPost['id'] == null) {
         return error422('Enter post ID');
-    } 
+    }
 
     $ID = mysqli_real_escape_string($conn, $getPost['id']);
 
@@ -110,14 +137,14 @@ function getPostFunc($getPost) {
                     $data['data']['image'] = $row->image;
                     $data['data']['date'] = $row->date;
                 }
-            
+
                 $section = new stdClass();
                 $section->name = $row->section_name;
                 $section->description = $row->section_description;
                 if (!in_array($section, $data['data']['sections'])) {
                     $data['data']['sections'][] = $section;
                 }
-            
+
                 $comment = new stdClass();
                 $comment->login = $row->login;
                 $comment->comment = $row->comment;
@@ -146,7 +173,8 @@ function getPostFunc($getPost) {
     }
 }
 
-function getPostsFunc(){
+function getPostsFunc()
+{
     global $conn;
 
     $query = "SELECT b.id, b.title, b.image, b.date, bs.name AS section_name, bs.description AS section_description, u.login, c.comment
@@ -158,8 +186,8 @@ function getPostsFunc(){
 
     $result = mysqli_query($conn, $query);
 
-    if ($result){
-        if (mysqli_num_rows($result) > 0){
+    if ($result) {
+        if (mysqli_num_rows($result) > 0) {
 
             $data = [
                 'status' => 200,
@@ -181,14 +209,14 @@ function getPostsFunc(){
                         'comments' => [],
                     ];
                 }
-            
+
                 $section = new stdClass();
                 $section->name = $row->section_name;
                 $section->description = $row->section_description;
                 if (!in_array($section, $data['data']['posts'][$postId]['sections'])) {
                     $data['data']['posts'][$postId]['sections'][] = $section;
                 }
-            
+
                 $comment = new stdClass();
                 $comment->login = $row->login;
                 $comment->comment = $row->comment;
@@ -220,12 +248,13 @@ function getPostsFunc(){
 }
 
 
-function getUsersPostFunc($getPost) {
+function getUsersPostFunc($getPost)
+{
     global $conn;
 
     if ($getPost['userid'] == null) {
         return error422('Enter user ID');
-    } 
+    }
 
     $ID = mysqli_real_escape_string($conn, $getPost['userid']);
 
@@ -254,7 +283,8 @@ function getUsersPostFunc($getPost) {
 
             if (!isset($posts[$postId])) {
                 $posts[$postId] = [
-                    'id' => $postId, // Dodanie ID obiektu
+                    'id' => $postId,
+                    // Dodanie ID obiektu
                     'title' => $row->title,
                     'image' => $row->image,
                     'date' => $row->date,
@@ -262,14 +292,14 @@ function getUsersPostFunc($getPost) {
                     'comments' => [],
                 ];
             }
-        
+
             $section = new stdClass();
             $section->name = $row->section_name;
             $section->description = $row->section_description;
             if (!in_array($section, $posts[$postId]['sections'])) {
                 $posts[$postId]['sections'][] = $section;
             }
-        
+
             $comment = new stdClass();
             $comment->login = $row->login;
             $comment->comment = $row->comment;

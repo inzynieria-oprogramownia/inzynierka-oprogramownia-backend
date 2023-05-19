@@ -2,16 +2,17 @@
 
 require '..\DBconnect.php';
 
-function getAllUsers(){
+function getAllUsers()
+{
     global $conn;
 
     $query = "SELECT * FROM react_php_users";
     $result = mysqli_query($conn, $query);
 
-    if ($result){
-        if (mysqli_num_rows($result) > 0){
+    if ($result) {
+        if (mysqli_num_rows($result) > 0) {
 
-            $res = mysqli_fetch_all($result,MYSQLI_ASSOC);
+            $res = mysqli_fetch_all($result, MYSQLI_ASSOC);
 
             $data = [
                 'status' => 200,
@@ -41,7 +42,8 @@ function getAllUsers(){
     }
 }
 
-function error422($mess){
+function error422($mess)
+{
     $data = [
         'status' => 422,
         'messeage' => $mess,
@@ -51,22 +53,23 @@ function error422($mess){
     exit();
 }
 
-function addUserFunc($addUser){
+function addUserFunc($addUser)
+{
     global $conn;
 
     $login = mysqli_real_escape_string($conn, $addUser['login']);
     $email = mysqli_real_escape_string($conn, $addUser['email']);
     $password = mysqli_real_escape_string($conn, $addUser['password']);
 
-    if (empty(trim($login))){
+    if (empty(trim($login))) {
 
         return error422('Enter your login');
 
-    } elseif (empty(trim($email))){
+    } elseif (empty(trim($email))) {
 
         return error422('Enter your email');
 
-    } elseif (empty(trim($password))){
+    } elseif (empty(trim($password))) {
 
         return error422('Enter your password');
 
@@ -74,8 +77,8 @@ function addUserFunc($addUser){
         $query = "INSERT INTO react_php_users (email, login, password) VALUES ('$email', '$login', '$password')";
         $result = mysqli_query($conn, $query);
 
-        if ($result){
-            
+        if ($result) {
+
             $data = [
                 'status' => 201,
                 'message' => 'User Created Successfully',
@@ -96,12 +99,13 @@ function addUserFunc($addUser){
 }
 
 
-function getUserFunc($userID){
+function getUserFunc($userID)
+{
     global $conn;
 
-    if ($userID['id'] == null){
+    if ($userID['id'] == null) {
         return error422('Enter your user ID');
-    } 
+    }
 
     $ID = mysqli_real_escape_string($conn, $userID['id']);
 
@@ -116,8 +120,8 @@ function getUserFunc($userID){
 
     $result = mysqli_query($conn, $query);
 
-    if ($result){
-        
+    if ($result) {
+
         if (mysqli_num_rows($result) > 0) {
 
             $data = [
@@ -186,15 +190,16 @@ function getUserFunc($userID){
 }
 
 
-function loginUserFunc($loginUser){
+function loginUserFunc($loginUser)
+{
 
     global $conn;
 
-    if ($loginUser['login'] == null){
+    if ($loginUser['login'] == null) {
 
         return error422('Enter your login');
 
-    } elseif ($loginUser['password'] == null){
+    } elseif ($loginUser['password'] == null) {
 
         return error422('Enter your password');
 
@@ -207,9 +212,9 @@ function loginUserFunc($loginUser){
     $query = "SELECT id FROM react_php_users WHERE login='$login' AND password='$password' LIMIT 1";
     $result = mysqli_query($conn, $query);
 
-    if ($result){
-        
-        if (mysqli_num_rows($result)==1){
+    if ($result) {
+
+        if (mysqli_num_rows($result) == 1) {
 
             $res = mysqli_fetch_assoc($result);
             $data = [
@@ -240,17 +245,18 @@ function loginUserFunc($loginUser){
 
 }
 
-function addLikedMealFunc($addLikedMeal){
+function addLikedMealFunc($addLikedMeal)
+{
     global $conn;
 
     $userID = mysqli_real_escape_string($conn, $addLikedMeal['userID']);
     $mealID = mysqli_real_escape_string($conn, $addLikedMeal['mealID']);
 
-    if (empty(trim($userID))){
+    if (empty(trim($userID))) {
 
         return error422('Enter userID');
 
-    } elseif (empty(trim($mealID))){
+    } elseif (empty(trim($mealID))) {
 
         return error422('Enter mealID');
 
@@ -258,8 +264,8 @@ function addLikedMealFunc($addLikedMeal){
         $query = "INSERT INTO react_php_liked_recipe (userID, mealID) VALUES ('$userID', '$mealID')";
         $result = mysqli_query($conn, $query);
 
-        if ($result){
-            
+        if ($result) {
+
             $data = [
                 'status' => 201,
                 'message' => 'Meal Liked Successfully',
@@ -279,10 +285,11 @@ function addLikedMealFunc($addLikedMeal){
 
 }
 
-function getLikedMealsFunc($userid){
+function getLikedMealsFunc($userid)
+{
     global $conn;
 
-    if ($userid['userid'] == null){
+    if ($userid['userid'] == null) {
         return error422('Enter your user ID');
     }
 
@@ -294,9 +301,9 @@ function getLikedMealsFunc($userid){
     JOIN react_php_ingredient AS ing ON ing.mealid = rec.id
     WHERE lr.userID='$ID';";
 
-    $result = mysqli_query($conn,$query);
+    $result = mysqli_query($conn, $query);
 
-    if ($result){
+    if ($result) {
         if (mysqli_num_rows($result) > 0) {
             $data = [
                 'status' => 200,
@@ -306,14 +313,14 @@ function getLikedMealsFunc($userid){
                 ],
             ];
 
-            $meals = []; 
+            $meals = [];
 
             while ($row = mysqli_fetch_object($result)) {
                 $mealId = $row->id;
 
                 if (!isset($meals[$mealId])) {
                     $meals[$mealId] = [
-                        'id' => $row->id, 
+                        'id' => $row->id,
                         'title' => $row->title,
                         'image' => $row->image,
                         'date' => $row->date,
@@ -325,7 +332,7 @@ function getLikedMealsFunc($userid){
                         'ingredients' => [],
                     ];
                 }
-            
+
                 $ingredient = new stdClass();
                 $ingredient->name = $row->name;
                 $ingredient->weight = $row->weight;
@@ -358,10 +365,11 @@ function getLikedMealsFunc($userid){
 
 
 
-function getCreatedMealsFunc($userid){
+function getCreatedMealsFunc($userid)
+{
     global $conn;
 
-    if ($userid['userid'] == null){
+    if ($userid['userid'] == null) {
         return error422('Enter your user ID');
     }
 
@@ -375,7 +383,7 @@ function getCreatedMealsFunc($userid){
 
     $result = mysqli_query($conn, $query);
 
-    if ($result){
+    if ($result) {
         if (mysqli_num_rows($result) > 0) {
             $data = [
                 'status' => 200,
@@ -404,7 +412,7 @@ function getCreatedMealsFunc($userid){
                         'ingredients' => [],
                     ];
                 }
-            
+
                 if (!empty($row->name) && !empty($row->weight)) {
                     $ingredient = new stdClass();
                     $ingredient->name = $row->name;
