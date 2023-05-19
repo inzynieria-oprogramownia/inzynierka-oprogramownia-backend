@@ -260,9 +260,9 @@ function getUsersPostFunc($getPost)
 
     $query = "SELECT b.id, b.title, b.image, b.date, bs.name AS section_name, bs.description AS section_description, u.login, c.comment
     FROM react_php_blog AS b 
-    JOIN react_php_blog_sections AS bs ON bs.postid = b.id
-    JOIN react_php_comments AS c ON c.postid = b.id
-    JOIN react_php_users AS u ON u.id=c.userid
+    LEFT JOIN react_php_blog_sections AS bs ON bs.postid = b.id
+    LEFT JOIN react_php_comments AS c ON c.postid = b.id
+    LEFT JOIN react_php_users AS u ON u.id=c.userid
     WHERE b.userid = '$ID'";
 
     $result = mysqli_query($conn, $query);
@@ -276,15 +276,14 @@ function getUsersPostFunc($getPost)
             ],
         ];
 
-        $posts = []; // Tablica pomocnicza do grupowania sekcji i komentarzy według ID posta
-
+        $posts = []; 
+        
         while ($row = mysqli_fetch_object($result)) {
             $postId = $row->id;
 
             if (!isset($posts[$postId])) {
                 $posts[$postId] = [
                     'id' => $postId,
-                    // Dodanie ID obiektu
                     'title' => $row->title,
                     'image' => $row->image,
                     'date' => $row->date,
@@ -310,6 +309,7 @@ function getUsersPostFunc($getPost)
 
         // Konwersja tablicy pomocniczej na indeksowaną tablicę wynikową
         $data['data']['posts'] = array_values($posts);
+        
 
         header("HTTP/1.0 200 Success");
         return json_encode($data);
