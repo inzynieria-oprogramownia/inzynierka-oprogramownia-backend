@@ -39,18 +39,17 @@ function addMealFunc($addMeal){
     } elseif (empty(trim($mealoption))) {
         return error422('Enter meal type');
     } else {
-        $imageFileName = $_FILES["uploadfile"]["name"];
-        $imageFileType = strtolower(pathinfo($imageFileName, PATHINFO_EXTENSION));
+        $targetDirectory = 'meal_images/'.$userID.'/';
+        $targetFile = $targetDirectory . basename($_FILES["uploadfile"]["name"]);
+
+        $imageFileType = strtolower(pathinfo($targetFile, PATHINFO_EXTENSION));
         $allowedExtensions = array('jpg', 'jpeg', 'png');
         
         if (!in_array($imageFileType, $allowedExtensions)) {
             return error422('Invalid image file type');
         }
 
-        $targetDirectory = 'meal_images/'.$userID.'/';
-        $targetFile = $targetDirectory . basename($imageFileName);
-
-        if (move_uploaded_file($backgroundImage, $targetFile)) {
+        if (move_uploaded_file($_FILES["uploadfile"]["tmp_name"], $targetFile)) {
             $query = "INSERT INTO react_php_recipe (userID, image, title, date, description, time, people, kcal, mealoption) VALUES ('$userID', '$targetFile', '$title', '$date', '$description', '$time', '$people', '$kcal', '$mealoption')";
             $result = mysqli_query($conn, $query);
 
