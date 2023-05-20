@@ -209,7 +209,7 @@ function loginUserFunc($loginUser)
     $password = mysqli_real_escape_string($conn, $loginUser['password']);
 
 
-    $query = "SELECT id FROM react_php_users WHERE login='$login' AND password='$password' LIMIT 1";
+    $query = "SELECT id, premium FROM react_php_users WHERE login='$login' AND password='$password' LIMIT 1";
     $result = mysqli_query($conn, $query);
 
     if ($result) {
