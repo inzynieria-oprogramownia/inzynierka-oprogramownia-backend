@@ -443,5 +443,48 @@ function getCreatedMealsFunc($userid)
     }
 }
 
+function removeLikedMealFunc($removeLiked) {
+
+    global $conn;
+
+    if (!isset($removeLiked['userID'])){
+        return error422('user id not found in url');
+    } elseif ($removeLiked['userID'] == null){
+        return error422('Enter userID');
+    } elseif (!isset($removeLiked['mealID'])){
+        return error422('meal id not found in url');
+    } elseif ($removeLiked['mealID'] == null){
+        return error422('Enter mealID');
+    }
+
+    $userID = mysqli_real_escape_string($conn, $removeLiked['userID']);
+    $mealID = mysqli_real_escape_string($conn, $removeLiked['mealID']);
+
+    $query = "DELETE FROM react_php_liked_recipe WHERE userID = '$userID' AND mealID = '$mealID';";
+
+    $result = mysqli_query($conn, $query);
+
+    if ($result){
+
+        $data = [
+            'status' => 204,
+            'message' => 'Unliked Successfully',
+        ];
+        header("HTTP/1.0 204 Deleted");
+        return json_encode($data);
+
+    } else {
+        $data = [
+            'status' => 404,
+            'message' => 'No liked post found for this user',
+        ];
+        header("HTTP/1.0 404 Not Found");
+        return json_encode($data);
+    }
+
+
+
+}
+
 
 ?>
