@@ -192,7 +192,7 @@ function getAllMealsFunc()
 {
     global $conn;
 
-    $query = "SELECT backgroundImage, title, date, description, time, people, kcal, mealoption FROM react_php_recipe";
+    $query = "SELECT image, title, date, id,description, time, people, kcal, mealoption FROM react_php_recipe";
     $result = mysqli_query($conn, $query);
 
     if ($result) {
