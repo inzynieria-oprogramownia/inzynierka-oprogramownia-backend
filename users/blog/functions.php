@@ -172,22 +172,30 @@ function getPostFunc($getPost)
         return json_encode($data);
     }
 }
-
+function findPostIndex($posts, $key, $value) {
+    foreach ($posts as $index => $post) {
+        if ($post[$key] == $value) {
+            return $index;
+        }
+    }
+    return -1;
+}
 function getPostsFunc()
 {
     global $conn;
-
+ 
     $query = "SELECT b.id, b.title, b.image, b.date, bs.name AS section_name, bs.description AS section_description, u.login, c.comment
               FROM react_php_blog AS b 
-               JOIN react_php_blog_sections AS bs ON bs.postid = b.id
-               JOIN react_php_comments AS c ON c.postid = b.id
-               JOIN react_php_users AS u ON u.id=c.userid
+              LEFT JOIN react_php_blog_sections AS bs ON bs.postid = b.id
+              LEFT JOIN react_php_comments AS c ON c.postid = b.id
+              LEFT JOIN react_php_users AS u ON u.id=c.userid
               ORDER BY b.id";
-
+ 
     $result = mysqli_query($conn, $query);
-
+ 
     if ($result) {
         if (mysqli_num_rows($result) > 0) {
+ 
             $data = [
                 'status' => 200,
                 'message' => 'Posts Found',
@@ -195,38 +203,43 @@ function getPostsFunc()
                     'posts' => [],
                 ],
             ];
-
+ 
             while ($row = mysqli_fetch_object($result)) {
                 $postId = $row->id;
-
-                $post = [
-                    'id' => $postId,
-                    'title' => $row->title,
-                    'image' => $row->image,
-                    'date' => $row->date,
-                    'sections' => [],
-                    'comments' => [],
-                ];
-
+ 
+                $postIndex = findPostIndex($data['data']['posts'], 'id', $postId);
+ 
+                if ($postIndex === -1) {
+                    $post = [
+                        'id' => $postId,
+                        'title' => $row->title,
+                        'image' => $row->image,
+                        'date' => $row->date,
+                        'sections' => [],
+                        'comments' => [],
+                    ];
+ 
+                    $data['data']['posts'][] = $post;
+                    $postIndex = count($data['data']['posts']) - 1;
+                }
+ 
                 $section = new stdClass();
                 $section->name = $row->section_name;
                 $section->description = $row->section_description;
-                if (!in_array($section, $post['sections'])) {
-                    $post['sections'][] = $section;
+                if (!in_array($section, $data['data']['posts'][$postIndex]['sections'])) {
+                    $data['data']['posts'][$postIndex]['sections'][] = $section;
                 }
-
+ 
                 $comment = new stdClass();
                 $comment->login = $row->login;
                 $comment->comment = $row->comment;
-                if (!in_array($comment, $post['comments'])) {
-                    $post['comments'][] = $comment;
+                if (!in_array($comment, $data['data']['posts'][$postIndex]['comments'])) {
+                    $data['data']['posts'][$postIndex]['comments'][] = $comment;
                 }
-
-                $data['data']['posts'][] = $post;
             }
-
             header("HTTP/1.0 200 OK");
             return json_encode($data);
+ 
         } else {
             $data = [
                 'status' => 404,
@@ -235,6 +248,8 @@ function getPostsFunc()
             header("HTTP/1.0 404 Not Found");
             return json_encode($data);
         }
+ 
+ 
     } else {
         $data = [
             'status' => 500,
