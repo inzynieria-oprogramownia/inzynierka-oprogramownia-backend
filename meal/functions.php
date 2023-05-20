@@ -121,9 +121,9 @@ function getMealFunc($mealID)
 
     $ID = mysqli_real_escape_string($conn, $mealID['id']);
 
-    $query = "SELECT r.backgroundImage, r.title, r.date, r.description, r.time, r.people, r.kcal, r.mealoption, ing.name AS ingredient_name, ing.weight AS ingredient_weight
+    $query = "SELECT r.image, r.title, r.date, r.description, r.time, r.people, r.kcal, r.mealoption, ing.name AS ingredient_name, ing.weight AS ingredient_weight
           FROM react_php_recipe as r
-          JOIN react_php_ingredient as ing ON r.id = ing.mealid
+          LEFT JOIN react_php_ingredient as ing ON r.id = ing.mealid
           WHERE r.id = '$ID'";
 
 
@@ -144,7 +144,7 @@ function getMealFunc($mealID)
             while ($row = mysqli_fetch_object($result)) {
                 if (!isset($data['data']['title'])) {
                     $data['data']['title'] = $row->title;
-                    $data['data']['backgroundImage'] = $row->backgroundImage;
+                    $data['data']['image'] = $row->image;
                     $data['data']['date'] = $row->date;
                     $data['data']['description'] = $row->description;
                     $data['data']['time'] = $row->time;

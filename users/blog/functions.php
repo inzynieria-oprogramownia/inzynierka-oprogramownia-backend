@@ -113,9 +113,9 @@ function getPostFunc($getPost)
 
     $query = "SELECT b.title, b.image, b.date, bs.name AS section_name, bs.description AS section_description, u.login, c.comment
               FROM react_php_blog AS b 
-              JOIN react_php_blog_sections AS bs ON bs.postid = b.id
-              JOIN react_php_comments AS c ON c.postid = b.id
-              JOIN react_php_users AS u ON u.id=c.userid
+              LEFT JOIN react_php_blog_sections AS bs ON bs.postid = b.id
+              LEFT JOIN react_php_comments AS c ON c.postid = b.id
+              LEFT JOIN react_php_users AS u ON u.id=c.userid
               WHERE b.id = '$ID'";
 
     $result = mysqli_query($conn, $query);
