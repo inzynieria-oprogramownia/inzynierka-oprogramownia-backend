@@ -179,16 +179,15 @@ function getPostsFunc()
 
     $query = "SELECT b.id, b.title, b.image, b.date, bs.name AS section_name, bs.description AS section_description, u.login, c.comment
               FROM react_php_blog AS b 
-              JOIN react_php_blog_sections AS bs ON bs.postid = b.id
-              JOIN react_php_comments AS c ON c.postid = b.id
-              JOIN react_php_users AS u ON u.id=c.userid
+               JOIN react_php_blog_sections AS bs ON bs.postid = b.id
+               JOIN react_php_comments AS c ON c.postid = b.id
+               JOIN react_php_users AS u ON u.id=c.userid
               ORDER BY b.id";
 
     $result = mysqli_query($conn, $query);
 
     if ($result) {
         if (mysqli_num_rows($result) > 0) {
-
             $data = [
                 'status' => 200,
                 'message' => 'Posts Found',
@@ -200,33 +199,34 @@ function getPostsFunc()
             while ($row = mysqli_fetch_object($result)) {
                 $postId = $row->id;
 
-                if (!isset($data['data']['posts'][$postId])) {
-                    $data['data']['posts'][$postId] = [
-                        'title' => $row->title,
-                        'image' => $row->image,
-                        'date' => $row->date,
-                        'sections' => [],
-                        'comments' => [],
-                    ];
-                }
+                $post = [
+                    'id' => $postId,
+                    'title' => $row->title,
+                    'image' => $row->image,
+                    'date' => $row->date,
+                    'sections' => [],
+                    'comments' => [],
+                ];
 
                 $section = new stdClass();
                 $section->name = $row->section_name;
                 $section->description = $row->section_description;
-                if (!in_array($section, $data['data']['posts'][$postId]['sections'])) {
-                    $data['data']['posts'][$postId]['sections'][] = $section;
+                if (!in_array($section, $post['sections'])) {
+                    $post['sections'][] = $section;
                 }
 
                 $comment = new stdClass();
                 $comment->login = $row->login;
                 $comment->comment = $row->comment;
-                if (!in_array($comment, $data['data']['posts'][$postId]['comments'])) {
-                    $data['data']['posts'][$postId]['comments'][] = $comment;
+                if (!in_array($comment, $post['comments'])) {
+                    $post['comments'][] = $comment;
                 }
+
+                $data['data']['posts'][] = $post;
             }
+
             header("HTTP/1.0 200 OK");
             return json_encode($data);
-
         } else {
             $data = [
                 'status' => 404,
@@ -235,8 +235,6 @@ function getPostsFunc()
             header("HTTP/1.0 404 Not Found");
             return json_encode($data);
         }
-
-
     } else {
         $data = [
             'status' => 500,
@@ -276,8 +274,8 @@ function getUsersPostFunc($getPost)
             ],
         ];
 
-        $posts = []; 
-        
+        $posts = [];
+
         while ($row = mysqli_fetch_object($result)) {
             $postId = $row->id;
 
@@ -309,7 +307,7 @@ function getUsersPostFunc($getPost)
 
         // Konwersja tablicy pomocniczej na indeksowaną tablicę wynikową
         $data['data']['posts'] = array_values($posts);
-        
+
 
         header("HTTP/1.0 200 Success");
         return json_encode($data);
