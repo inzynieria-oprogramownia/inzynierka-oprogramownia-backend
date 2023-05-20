@@ -297,8 +297,8 @@ function getLikedMealsFunc($userid)
 
     $query = "SELECT rec.id, rec.image, rec.title, rec.date, rec.description, rec.time, rec.people, rec.kcal, rec.mealoption, ing.name, ing.weight
     FROM react_php_liked_recipe AS lr
-    JOIN react_php_recipe AS rec ON rec.id = lr.mealID 
-    JOIN react_php_ingredient AS ing ON ing.mealid = rec.id
+    LEFT JOIN react_php_recipe AS rec ON rec.id = lr.mealID 
+    LEFT JOIN react_php_ingredient AS ing ON ing.mealid = rec.id
     WHERE lr.userID='$ID';";
 
     $result = mysqli_query($conn, $query);
@@ -443,17 +443,18 @@ function getCreatedMealsFunc($userid)
     }
 }
 
-function removeLikedMealFunc($removeLiked) {
+function removeLikedMealFunc($removeLiked)
+{
 
     global $conn;
 
-    if (!isset($removeLiked['userID'])){
+    if (!isset($removeLiked['userID'])) {
         return error422('user id not found in url');
-    } elseif ($removeLiked['userID'] == null){
+    } elseif ($removeLiked['userID'] == null) {
         return error422('Enter userID');
-    } elseif (!isset($removeLiked['mealID'])){
+    } elseif (!isset($removeLiked['mealID'])) {
         return error422('meal id not found in url');
-    } elseif ($removeLiked['mealID'] == null){
+    } elseif ($removeLiked['mealID'] == null) {
         return error422('Enter mealID');
     }
 
@@ -464,7 +465,7 @@ function removeLikedMealFunc($removeLiked) {
 
     $result = mysqli_query($conn, $query);
 
-    if ($result){
+    if ($result) {
 
         $data = [
             'status' => 204,
