@@ -15,19 +15,19 @@ function error422($mess){
 function addCommentFunc($addComment){
     global $conn;
 
-    $userid = mysqli_real_escape_string($conn, $addComment['userid']);
-    $postid = mysqli_real_escape_string($conn, $addComment['postid']);
+    $userid = mysqli_real_escape_string($conn, $addComment['userID']);
+    $postid = mysqli_real_escape_string($conn, $addComment['postID']);
     $date = date('Y.m.d h:i:sa');
     $comment = mysqli_real_escape_string($conn, $addComment['comment']);
 
 
     if (empty(trim($userid))) {
 
-        return error422('Enter user ID');
+        return error422('Enter userID');
 
     } elseif (empty(trim($postid))) {
 
-        return error422('Enter post ID');
+        return error422('Enter postID');
 
     } elseif (empty(trim($comment))) {
 
