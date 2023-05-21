@@ -107,15 +107,15 @@ function addWeightFunc($addWeight){
 function updateWeightFunc($input, $params){
     global $conn;
 
-    if (!isset($params['id'])){
+    if (!isset($params['userid'])){
         return error422('User id not found in a link');
-    } elseif (empty($params['id'])) {
-        return error422('Enter id');
+    } elseif (empty($params['userid'])) {
+        return error422('Enter userid');
     }
 
-    $ID = mysqli_real_escape_string($conn, $params['id']);
+    $ID = mysqli_real_escape_string($conn, $params['userid']);
 
-    $weight = mysqli_real_escape_string($conn, $input['weight']);
+    $weight = mysqli_real_escape_string($conn, $params['weight']);
     $date = date("Y-m-d");
 
     if (empty(trim($weight))){
@@ -123,7 +123,7 @@ function updateWeightFunc($input, $params){
     } else {
     
 
-        $query = "UPDATE react_php_user_weight SET weight='$weight' WHERE id='$ID' AND date='$date';";
+        $query = "UPDATE react_php_user_weight SET weight='$weight' WHERE userid='$ID' AND date='$date'";
         $result = mysqli_query($conn, $query);
 
         if ($result){
