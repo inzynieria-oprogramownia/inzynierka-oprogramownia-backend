@@ -117,25 +117,30 @@ function updateWeightFunc($input, $params){
 
     $weight = mysqli_real_escape_string($conn, $input['weight']);
     $date = date("Y-m-d");
+
+    if (empty(trim($weight))){
+        return error422('Enter Weight');
+    } else {
     
 
-    $query = "UPDATE react_php_user_weight SET weight='$weight' WHERE id='$ID' AND date='$date';";
-    $result = mysqli_query($conn, $query);
+        $query = "UPDATE react_php_user_weight SET weight='$weight' WHERE id='$ID' AND date='$date';";
+        $result = mysqli_query($conn, $query);
 
-    if ($result){
-        $data = [
-            'status' => 200,
-            'message' => 'Weight Updated Successfully',
-        ];
-        header("HTTP/1.0 200 Weight Updated Successfully");
-        return json_encode($data);
-    } else {
-        $data = [
-            'status' => 500,
-            'message' => 'Internal Server Error',
-        ];
-        header("HTTP/1.0 500 Internal Server Error");
-        return json_encode($data);
+        if ($result){
+            $data = [
+                'status' => 200,
+                'message' => 'Weight Updated Successfully',
+            ];
+            header("HTTP/1.0 200 Weight Updated Successfully");
+            return json_encode($data);
+        } else {
+            $data = [
+                'status' => 500,
+                'message' => 'Internal Server Error',
+            ];
+            header("HTTP/1.0 500 Internal Server Error");
+            return json_encode($data);
+        }
     }
 }
 
