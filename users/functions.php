@@ -140,6 +140,7 @@ function getUserFunc($userID)
                     $data['data']['login'] = $row->login;
                     $data['data']['email'] = $row->email;
                     $data['data']['password'] = $row->password;
+                    $data['data']['premium'] = $row->premium;
                 }
 
                 if ($row->liked_meal_id != null) {
