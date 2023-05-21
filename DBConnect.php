@@ -1,6 +1,6 @@
 <?php 
 	$server = 'localhost';
-	$dbname = 'nutriplan';
+	$dbname = 'react_php';
 	$user = 'root';
 	$pass = '';
 
