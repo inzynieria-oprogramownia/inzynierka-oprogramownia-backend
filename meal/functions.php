@@ -61,12 +61,12 @@ function addMealFunc($addMeal)
             if ($result) {
                 $mealId = mysqli_insert_id($conn);
 
-                if (isset($addMeal['ingredient']) && is_array($addMeal['ingredient'])) {
-                    $ingredients = $addMeal['ingredient'];
+                if (isset($addMeal['sections']) && is_array($addMeal['sections'])) {
+                    $ingredients = $addMeal['sections'];
 
                     foreach ($ingredients as $ingredient) {
                         $ingredientName = mysqli_real_escape_string($conn, $ingredient['name']);
-                        $ingredientWeight = mysqli_real_escape_string($conn, $ingredient['weight']);
+                        $ingredientWeight = mysqli_real_escape_string($conn, $ingredient['description']);
                         $ingredientQuery = "INSERT INTO react_php_ingredient (mealid, name, weight) VALUES ('$mealId', '$ingredientName', '$ingredientWeight')";
                         $ingredientResult = mysqli_query($conn, $ingredientQuery);
 
